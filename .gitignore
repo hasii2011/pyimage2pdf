@@ -1,0 +1,11 @@
+/shelf/
+/workspace.xml
+.idea/
+__pycache__/
+.DS_Store
+build/
+dist/
+/pyimage2pdf.egg-info/
+/pyenv-3.12.8/
+.python-version
+.envrc

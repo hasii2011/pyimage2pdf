@@ -1,0 +1,34 @@
+[build-system]
+requires = ['setuptools', 'wheel']
+build-backend = "setuptools.build_meta"
+
+[project]
+name='pyimage2pdf'
+dynamic = ["version"]
+description = 'An adapter'
+readme = "README.md"
+license = {text = 'GNU AFFERO GENERAL PUBLIC LICENSE'}
+authors = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
+maintainers = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
+keywords = ['pyut,images,adapter,pdf']
+
+dependencies = [
+  'codeallybasic>=1.8.2',
+]
+
+[project.urls]
+Repository = 'https://github.com/hasii2011/pyimage2pdf'
+
+
+[tool.setuptools.packages.find]
+where = ['src']
+
+[tool.setuptools.package-data]
+'pyimage2pdf.resources' = ['loggingConfiguration.json']
+
+[tool.setuptools.dynamic]
+version = {attr = 'pyimage2pdf.__version__'}
+
+[project.scripts]
+
+pyfabricate = "pyimage2pdf.MainClass:commandHandler"
