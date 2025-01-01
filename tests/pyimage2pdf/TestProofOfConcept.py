@@ -1,4 +1,4 @@
-
+from curses.textpad import rectangle
 from datetime import datetime
 
 from os import pathsep as osPathSep
@@ -17,7 +17,9 @@ from pypdf import PdfReader
 from pypdf import PdfWriter
 
 from pypdf.annotations import FreeText
+
 from pypdf.constants import AnnotationFlag
+
 from pypdf.generic import RectangleObject
 
 from unittest import TestSuite
@@ -157,22 +159,22 @@ class TestProofOfConcept(UnitTestBase):
 
         pdfWriter.add_page(newPage)
 
-        left: float   = 20
-        top    = newHeight - 10
-        right  = 300
-        bottom = 650
+        rect: RectangleObject = RectangleObject((0, 0, 0, 0))
+        rect.left   = 20.0
+        rect.right  = 200.0
+        rect.top    = newHeight - 2.0
+        rect.bottom = newHeight - 50.0
         annotation: FreeText = FreeText(
-            text="Created by Pyut 9.6.0",
-            rect=(left, bottom, right, top),
-            font="Arial",
+            text=f'Created by Pyut 9.6.0 - {pdfReader.metadata.creation_date}',
+            rect=rect,
+            font="PT Mono",
             bold=True,
             italic=False,
             font_size="32pt",
-            font_color="000000",
+            font_color="00ff00",
             # border_color="0000ff",
-            # background_color="ffffff",
+            background_color="ffffff",
         )
-
         annotation.flags = AnnotationFlag.PRINT
         pdfWriter.add_annotation(page_number=0, annotation=annotation)
 
