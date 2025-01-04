@@ -1,13 +1,18 @@
+
 from unittest import TestSuite
 from unittest import main as unitTestMain
 
+from os import pathsep as osPathSep
+
+from pathlib import Path
+
+from codeallybasic.ResourceManager import ResourceManager
 from codeallybasic.UnitTestBase import UnitTestBase
 
 from pyimage2pdf.PyImage2Pdf import PyImage2Pdf
 
 
-# import the class you want to test here
-# from org.pyut.template import template
+IMAGE_FILE_NAME:    str  = 'CompactImageDump.png'
 
 
 class TestPyImage2Pdf(UnitTestBase):
@@ -16,6 +21,8 @@ class TestPyImage2Pdf(UnitTestBase):
         Gato Malo – Humberto A. Sanchez II
         Generated: 31 December 2024
     """
+    IMAGES_RESOURCE_PATH: str = f'resources{osPathSep}images'
+    IMAGES_PACKAGE_NAME:  str = f'{UnitTestBase.RESOURCES_PACKAGE_NAME}.images'
 
     @classmethod
     def setUpClass(cls):
@@ -32,6 +39,17 @@ class TestPyImage2Pdf(UnitTestBase):
         pyimage2pdf: PyImage2Pdf = PyImage2Pdf()
 
         self.assertIsNotNone(pyimage2pdf, 'I should get an instance')
+
+    def testConvert(self):
+
+        pyimage2pdf: PyImage2Pdf = PyImage2Pdf()
+
+        basicPath: Path = ResourceManager.computeResourcePath(resourcePath=TestPyImage2Pdf.IMAGES_RESOURCE_PATH,
+                                                              packageName=TestPyImage2Pdf.IMAGES_PACKAGE_NAME)
+
+        fqPath: Path      = basicPath / IMAGE_FILE_NAME
+
+        pyimage2pdf.convert(imagePath=fqPath)
 
 
 def suite() -> TestSuite:
