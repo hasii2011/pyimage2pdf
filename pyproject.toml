@@ -11,9 +11,18 @@ license = {text = 'GNU AFFERO GENERAL PUBLIC LICENSE'}
 authors = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
 maintainers = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
 keywords = ['pyut,images,adapter,pdf']
-
+classifiers = [
+  "Programming Language :: Python",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Operating System :: MacOS :: MacOS X",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
   'codeallybasic>=1.8.5',
+  'click>= 8.1.8',
+  'pillow==11.0.0',
+  'pypdf>=5.1.0',
 ]
 
 [project.urls]
@@ -31,4 +40,4 @@ version = {attr = 'pyimage2pdf.__version__'}
 
 [project.scripts]
 
-pyfabricate = "pyimage2pdf.MainClass:commandHandler"
+image2pdf = "pyimage2pdf.CommandClass:commandHandler"

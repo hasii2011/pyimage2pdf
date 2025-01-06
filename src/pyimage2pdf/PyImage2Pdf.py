@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
 
 from pathlib import Path
+from typing import Optional
 
 from PIL.ImageFile import ImageFile
 
@@ -28,6 +29,9 @@ from pypdf.generic import RectangleObject
 from pyimage2pdf.Preferences import Preferences
 
 
+OUTPUT_SUFFIX: str = 'pdf'
+
+
 @dataclass
 class Dimensions:
     width:  float = 0.9
@@ -41,11 +45,12 @@ class PyImage2Pdf:
 
         self._preferences: Preferences = Preferences()
 
-    def convert(self, imagePath: Path):
+    def convert(self, imagePath: Path, pdfPath: Optional[Path] = None):
         """
 
         Args:
-            imagePath:
+            imagePath:  the image path
+            pdfPath:    Where to put the output pdf.  If not set use the preferences version
 
         """
 
@@ -59,7 +64,10 @@ class PyImage2Pdf:
 
         self.logger.debug(f'{newDimensions=}')
 
-        outputPath: Path = self._generateTheFinalOutputPath(originalImageFilePath=imagePath)
+        if pdfPath is None:
+            outputPath: Path = self._generateTheFinalOutputPath(originalImageFilePath=imagePath)
+        else:
+            outputPath = pdfPath
 
         self._createEnlargedPdfDocument(pageDimensions=newDimensions,
                                         metadata=pdfReader.metadata,
@@ -169,9 +177,18 @@ class PyImage2Pdf:
         return annotation
 
     def _generateTheFinalOutputPath(self, originalImageFilePath: Path):
+        """
+
+        Args:
+            originalImageFilePath:
+
+        Returns:  The combination of the original file name with the pdf suffix
+        and using the preferences output path
+
+        """
 
         bareName: str = originalImageFilePath.stem
 
-        fullPath: Path = self._preferences.outputPath / f'{bareName}.pdf'
+        fullPath: Path = self._preferences.outputPath / f'{bareName}.{OUTPUT_SUFFIX}'
 
         return fullPath
