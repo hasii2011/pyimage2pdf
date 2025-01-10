@@ -1,18 +1,21 @@
 
+from typing import cast
+from typing import List
+from typing import NewType
+from typing import Optional
 from typing import IO
 
 from logging import Logger
 from logging import getLogger
 
 from dataclasses import dataclass
+from dataclasses import field
 
 from tempfile import NamedTemporaryFile
 
 from pathlib import Path
-from typing import Optional
 
 from PIL.ImageFile import ImageFile
-
 from PIL.Image import Image
 from PIL.Image import open as pilOpen
 
@@ -38,6 +41,32 @@ class Dimensions:
     height: float = 0.0
 
 
+KeyWordList = NewType('KeyWordList', List[str])
+
+
+def keyWordsFactory() -> KeyWordList:
+    return KeyWordList([])
+
+
+@dataclass
+class PdfMetaData:
+    author:         str = ''
+    producer:       str = ''
+    title:          str = ''
+    subject:        str = ''
+    keywords:       KeyWordList = field(default_factory=keyWordsFactory)
+
+
+def pdfMetaDataFactory() -> PdfMetaData:
+    return PdfMetaData()
+
+
+@dataclass
+class PdfInformation:
+    annotationText: str         = ''
+    metadata:       PdfMetaData = field(default_factory=pdfMetaDataFactory)
+
+
 class PyImage2Pdf:
     def __init__(self):
 
@@ -45,18 +74,33 @@ class PyImage2Pdf:
 
         self._preferences: Preferences = Preferences()
 
-    def convert(self, imagePath: Path, pdfPath: Optional[Path] = None):
+    def convert(self, imagePath: Path, pdfPath: Optional[Path] = None, pdfInformation: Optional[PdfInformation] = None):
         """
 
         Args:
             imagePath:  the image path
             pdfPath:    Where to put the output pdf.  If not set use the preferences version
-
+            pdfInformation:
         """
 
-        tmpPdfFileNamePath: Path = self._createInitialPdf(imagePath)
+        if pdfInformation is None:
+            metadata: PdfMetaData = PdfMetaData(author=self._preferences.author,
+                                                producer=self._preferences.producer,
+                                                title=self._preferences.title,
+                                                subject=self._preferences.subject,
+                                                keywords=self._preferences.keywords)
+            from time import strftime
 
-        pdfReader:     PdfReader   = PdfReader(tmpPdfFileNamePath)
+            creationDate:   str = strftime(self._preferences.dateFormat)
+            annotationText: str = f'{self._preferences.title} - {creationDate}'
+
+        else:
+            metadata       = pdfInformation.metadata
+            annotationText = pdfInformation.annotationText
+
+        tmpPdfFileNamePath: Path = self._createInitialPdf(imagePath, metadata=metadata)
+
+        pdfReader:     PdfReader  = PdfReader(tmpPdfFileNamePath)
         singlePdfPage: PageObject = pdfReader.pages[0]
 
         self.logger.debug(f'{tmpPdfFileNamePath=}')
@@ -70,10 +114,11 @@ class PyImage2Pdf:
             outputPath = pdfPath
 
         self._createEnlargedPdfDocument(pageDimensions=newDimensions,
-                                        metadata=pdfReader.metadata,
+                                        metadata=cast(DocumentInformation, pdfReader.metadata),
+                                        annotationText=annotationText,
                                         singlePdfPage=singlePdfPage, outputPath=outputPath)
 
-    def _createInitialPdf(self, imagePath: Path) -> Path:
+    def _createInitialPdf(self, imagePath: Path, metadata: PdfMetaData) -> Path:
         """
         Create a temporary PDF file
         Args:
@@ -82,20 +127,21 @@ class PyImage2Pdf:
         Returns:  The the path to the pdf file
         """
 
-        preferences:     Preferences = self._preferences
         imageToConvert:  ImageFile   = pilOpen(imagePath)
         convertedImage:  Image       = imageToConvert.convert('RGB')
         tempPdfFile:     IO          = NamedTemporaryFile(delete=False, suffix='.pdf')
         pdfFileNamePath: Path        = Path(tempPdfFile.name)
 
-        # The output format is deduced from the file extension
-        # https://pillow.readthedocs.io/en/latest/handbook/image-file-formats.html
+        """
+        The output format is deduced from the file extension
+        https://pillow.readthedocs.io/en/latest/handbook/image-file-formats.html
+        """
         convertedImage.save(pdfFileNamePath,
-                            author=preferences.author,
-                            producer=preferences.producer,
-                            title=preferences.title,
-                            subject=preferences.subject,
-                            keywords=','.join(preferences.keywords),
+                            author=metadata.author,
+                            producer=metadata.producer,
+                            title=metadata.title,
+                            subject=metadata.subject,
+                            keywords=','.join(metadata.keywords)
                             )
 
         return pdfFileNamePath
@@ -122,9 +168,10 @@ class PyImage2Pdf:
 
     def _createEnlargedPdfDocument(self,
                                    pageDimensions: Dimensions,
-                                   metadata:   DocumentInformation | None,
-                                   singlePdfPage: PageObject,
-                                   outputPath: Path):
+                                   metadata:       DocumentInformation,
+                                   annotationText: str,
+                                   singlePdfPage:  PageObject,
+                                   outputPath:     Path):
         """
         Will be enlarged and we will add a custom annotation
         Args:
@@ -143,16 +190,12 @@ class PyImage2Pdf:
         pdfWriter.add_page(newPage)
 
         pdfWriter.metadata = metadata
-        annotation: MarkupAnnotation = self._generateCustomAnnotation(pageDimensions)
+        annotation: MarkupAnnotation = self._generateCustomAnnotation(pageDimensions, annotationText=annotationText)
         pdfWriter.add_annotation(page_number=0, annotation=annotation)
 
         pdfWriter.write(outputPath)
 
-    def _generateCustomAnnotation(self, pageDimensions: Dimensions) -> MarkupAnnotation:
-
-        from time import strftime
-
-        creationDate: str = strftime(self._preferences.dateFormat)
+    def _generateCustomAnnotation(self, pageDimensions: Dimensions, annotationText: str) -> MarkupAnnotation:
 
         rect: RectangleObject = RectangleObject((0, 0, 0, 0))
         rect.left   = FloatObject(self._preferences.annotationLeft)
@@ -161,7 +204,7 @@ class PyImage2Pdf:
         rect.bottom = FloatObject(pageDimensions.height - self._preferences.annotationBottomOffset)
 
         annotation:   FreeText = FreeText(
-            text=f'{self._preferences.title} - {creationDate}',
+            text=f'{annotationText}',
             rect=rect,
             font="PT Mono",
             bold=True,

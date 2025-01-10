@@ -63,6 +63,8 @@ def commandHandler(input_file: Path, output_file: Path):
 
 if __name__ == "__main__":
 
-    # commandHandler(['-i', 'tests/resources/images/Tailor.jpg'])
+    commandHandler(['-i', 'tests/resources/images/CompactImageDump.png'])
     # commandHandler(['-i', 'tests/resources/images/Tailor.jpg', '-o', 'junk.pdf'])
-    commandHandler(['-i', 'tests/resources/images/CorruptedImage.png'])
+    # commandHandler(['-i', 'tests/resources/images/CorruptedImage.png'])
+    # commandHandler(['--help'])
+    # commandHandler(['--version'])

@@ -14,7 +14,7 @@ from codeallybasic.SecureConversions import SecureConversions
 from codeallybasic.SingletonV3 import SingletonV3
 
 
-KEYWORDS_PROPERTY:   StringList = StringList(['UML', 'Pyut', 'Diagram'])
+KEYWORDS_PROPERTY:   StringList = StringList(['Image', 'CLI'])
 DEFAULT_OUTPUT_PATH: Path       = Path('/tmp')
 
 SECTION_GENERAL: ValueDescriptions = ValueDescriptions(
@@ -28,9 +28,9 @@ SECTION_GENERAL: ValueDescriptions = ValueDescriptions(
 SECTION_METADATA: ValueDescriptions = ValueDescriptions(
     {
         KeyName('author'):   ValueDescription(defaultValue='Humberto A. Sanchez II'),
-        KeyName('producer'): ValueDescription(defaultValue='Pyut Plugin'),
-        KeyName('title'):    ValueDescription(defaultValue='Pyut Diagram Dump'),
-        KeyName('subject'):  ValueDescription(defaultValue='Developer Diagram'),
+        KeyName('producer'): ValueDescription(defaultValue='img2pdf'),
+        KeyName('title'):    ValueDescription(defaultValue='Created by img2pdf'),
+        KeyName('subject'):  ValueDescription(defaultValue='Image Conversion'),
         KeyName('keywords'): ValueDescription(defaultValue=KEYWORDS_PROPERTY, isStringList=True)
     }
 )
@@ -38,12 +38,12 @@ SECTION_METADATA: ValueDescriptions = ValueDescriptions(
 
 SECTION_ANNOTATIONS: ValueDescriptions = ValueDescriptions(
     {
-        KeyName('title'):  ValueDescription(defaultValue='Created by Pyut'),
+        KeyName('title'):  ValueDescription(defaultValue='Created by img2pdf'),
         KeyName('bold'):   ValueDescription(defaultValue='True',  deserializer=SecureConversions.secureBoolean),
         KeyName('italic'): ValueDescription(defaultValue='False', deserializer=SecureConversions.secureBoolean),
         KeyName('italic'): ValueDescription(defaultValue='False', deserializer=SecureConversions.secureBoolean),
         KeyName('annotationLeft'):         ValueDescription(defaultValue='20.0',  deserializer=SecureConversions.secureFloat),
-        KeyName('annotationRight'):        ValueDescription(defaultValue='200.0', deserializer=SecureConversions.secureFloat),
+        KeyName('annotationRight'):        ValueDescription(defaultValue='300.0', deserializer=SecureConversions.secureFloat),
         KeyName('annotationTopOffset'):    ValueDescription(defaultValue='2.0',   deserializer=SecureConversions.secureFloat),
         KeyName('annotationBottomOffset'): ValueDescription(defaultValue='50.0',  deserializer=SecureConversions.secureFloat),
         KeyName('dateFormat'):             ValueDescription(defaultValue='%d %b %Y %H:%M'),
