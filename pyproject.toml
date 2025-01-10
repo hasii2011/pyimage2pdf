@@ -25,6 +25,20 @@ dependencies = [
   'pypdf>=5.1.0',
 ]
 
+[project.optional-dependencies]
+test = [
+    "html-testRunner~=1.2.1",
+    "mypy== 1.14.0",
+    "buildlackey==1.7.0",
+]
+
+deploy = [
+    "wheel==0.45.1",
+    "setuptools==75.7.0",
+    "twine==6.0.1",
+    "build==1.2.2.post1",
+]
+
 [project.urls]
 Repository = 'https://github.com/hasii2011/pyimage2pdf'
 

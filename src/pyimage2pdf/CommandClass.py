@@ -5,8 +5,8 @@ from logging import getLogger
 from pathlib import Path
 
 from PIL import UnidentifiedImageError
-from click import ClickException
 
+from click import ClickException
 from click import Path as clickPath
 from click import command
 from click import option
