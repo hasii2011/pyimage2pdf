@@ -15,6 +15,7 @@ from click import version_option
 from click import secho as clickSEcho
 
 from pyimage2pdf import __version__ as pyImage2PdfVersion
+from pyimage2pdf.Preferences import Preferences
 
 from pyimage2pdf.PyImage2Pdf import OUTPUT_SUFFIX
 from pyimage2pdf.PyImage2Pdf import PyImage2Pdf
@@ -48,7 +49,8 @@ class CommandClass:
 @version_option(version=f'{pyImage2PdfVersion}', message='%(version)s')
 @option('-i', '--input-file',  required=True,  type=clickPath(readable=True, exists=True,  path_type=Path), help='The input image file name to convert.')
 @option('-o', '--output-file', required=False, type=clickPath(writable=True,               path_type=Path), help='The output pdf file name.')
-def commandHandler(input_file: Path, output_file: Path):
+@option('-t', '--title',       required=False,  help='The title to put on pdf file')
+def commandHandler(input_file: Path, output_file: Path, title: str):
     """
     \b
     This command converts input image files to pdf;  If
@@ -56,6 +58,9 @@ def commandHandler(input_file: Path, output_file: Path):
     based on the input file name
     """
 
+    preferences: Preferences = Preferences()
+    if title is not None:
+        preferences.title = title
     commandClass: CommandClass = CommandClass(inputFileName=input_file, outputFileName=output_file)
 
     commandClass.convert()
@@ -63,7 +68,8 @@ def commandHandler(input_file: Path, output_file: Path):
 
 if __name__ == "__main__":
 
-    commandHandler(['-i', 'tests/resources/images/CompactImageDump.png'])
+    # commandHandler(['-i', 'tests/resources/images/CompactImageDump.png'])
+    commandHandler(['-i', 'tests/resources/images/CompactImageDump.png', '--title', 'This is a custom title'])
     # commandHandler(['-i', 'tests/resources/images/Tailor.jpg', '-o', 'junk.pdf'])
     # commandHandler(['-i', 'tests/resources/images/CorruptedImage.png'])
     # commandHandler(['--help'])
