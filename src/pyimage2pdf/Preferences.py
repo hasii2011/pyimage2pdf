@@ -43,7 +43,7 @@ SECTION_ANNOTATIONS: ValueDescriptions = ValueDescriptions(
         KeyName('italic'): ValueDescription(defaultValue='False', deserializer=SecureConversions.secureBoolean),
         KeyName('italic'): ValueDescription(defaultValue='False', deserializer=SecureConversions.secureBoolean),
         KeyName('annotationLeft'):         ValueDescription(defaultValue='20.0',  deserializer=SecureConversions.secureFloat),
-        KeyName('annotationRight'):        ValueDescription(defaultValue='300.0', deserializer=SecureConversions.secureFloat),
+        KeyName('annotationWidth'):        ValueDescription(defaultValue='300.0', deserializer=SecureConversions.secureFloat),
         KeyName('annotationTopOffset'):    ValueDescription(defaultValue='2.0',   deserializer=SecureConversions.secureFloat),
         KeyName('annotationBottomOffset'): ValueDescription(defaultValue='50.0',  deserializer=SecureConversions.secureFloat),
         KeyName('dateFormat'):             ValueDescription(defaultValue='%d %b %Y %H:%M'),

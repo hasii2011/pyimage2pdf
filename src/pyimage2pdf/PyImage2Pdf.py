@@ -26,6 +26,7 @@ from pypdf import PdfWriter
 from pypdf.annotations import FreeText
 from pypdf.annotations import MarkupAnnotation
 from pypdf.constants import AnnotationFlag
+from pypdf.constants import DocumentInformationAttributes
 from pypdf.generic import FloatObject
 from pypdf.generic import RectangleObject
 
@@ -62,9 +63,11 @@ def pdfMetaDataFactory() -> PdfMetaData:
 
 
 @dataclass
-class PdfInformation:
-    annotationText: str         = ''
-    metadata:       PdfMetaData = field(default_factory=pdfMetaDataFactory)
+class PdfOptions:
+    annotationText:  str         = ''
+    annotationLeft:  float       = 0.0
+    annotationWidth: float       = 0.0
+    pdfMetaData:     PdfMetaData = field(default_factory=pdfMetaDataFactory)
 
 
 class PyImage2Pdf:
@@ -74,38 +77,29 @@ class PyImage2Pdf:
 
         self._preferences: Preferences = Preferences()
 
-    def convert(self, imagePath: Path, pdfPath: Optional[Path] = None, pdfInformation: Optional[PdfInformation] = None):
+    def convert(self, imagePath: Path, pdfPath: Optional[Path] = None, pdfOptions: Optional[PdfOptions] = None):
         """
 
         Args:
             imagePath:  the image path
             pdfPath:    Where to put the output pdf.  If not set use the preferences version
-            pdfInformation:
+            pdfOptions: Override the internal options
         """
-
-        if pdfInformation is None:
-            metadata: PdfMetaData = PdfMetaData(author=self._preferences.author,
-                                                producer=self._preferences.producer,
-                                                title=self._preferences.title,
-                                                subject=self._preferences.subject,
-                                                keywords=self._preferences.keywords)
-            from time import strftime
-
-            creationDate:   str = strftime(self._preferences.dateFormat)
-            annotationText: str = f'{self._preferences.title} - {creationDate}'
-
+        actualOptions: PdfOptions = PdfOptions()
+        if pdfOptions is None:
+            actualOptions = self._retrievePreferences()
         else:
-            metadata       = pdfInformation.metadata
-            annotationText = pdfInformation.annotationText
+            actualOptions.pdfMetaData        = pdfOptions.pdfMetaData
+            actualOptions.annotationText  = pdfOptions.annotationText
+            actualOptions.annotationLeft  = pdfOptions.annotationLeft
+            actualOptions.annotationWidth = actualOptions.annotationWidth
 
-        tmpPdfFileNamePath: Path = self._createInitialPdf(imagePath, metadata=metadata)
-
-        pdfReader:     PdfReader  = PdfReader(tmpPdfFileNamePath)
-        singlePdfPage: PageObject = pdfReader.pages[0]
+        tmpPdfFileNamePath: Path       = self._createInitialPdf(imagePath, metadata=actualOptions.pdfMetaData)
+        pdfReader:          PdfReader  = PdfReader(tmpPdfFileNamePath)
+        singlePdfPage:      PageObject = pdfReader.pages[0]
 
         self.logger.debug(f'{tmpPdfFileNamePath=}')
         newDimensions: Dimensions = self._computeEnlargedPdfSize(singlePdfPage=singlePdfPage, factor=self._preferences.pdfEnlargeFactor)
-
         self.logger.debug(f'{newDimensions=}')
 
         if pdfPath is None:
@@ -115,7 +109,7 @@ class PyImage2Pdf:
 
         self._createEnlargedPdfDocument(pageDimensions=newDimensions,
                                         metadata=cast(DocumentInformation, pdfReader.metadata),
-                                        annotationText=annotationText,
+                                        pdfOptions=actualOptions,
                                         singlePdfPage=singlePdfPage, outputPath=outputPath)
 
     def _createInitialPdf(self, imagePath: Path, metadata: PdfMetaData) -> Path:
@@ -169,7 +163,7 @@ class PyImage2Pdf:
     def _createEnlargedPdfDocument(self,
                                    pageDimensions: Dimensions,
                                    metadata:       DocumentInformation,
-                                   annotationText: str,
+                                   pdfOptions:     PdfOptions,
                                    singlePdfPage:  PageObject,
                                    outputPath:     Path):
         """
@@ -190,21 +184,21 @@ class PyImage2Pdf:
         pdfWriter.add_page(newPage)
 
         pdfWriter.metadata = metadata
-        annotation: MarkupAnnotation = self._generateCustomAnnotation(pageDimensions, annotationText=annotationText)
+        annotation: MarkupAnnotation = self._generateCustomAnnotation(pageDimensions, pdfOptions=pdfOptions)
         pdfWriter.add_annotation(page_number=0, annotation=annotation)
 
         pdfWriter.write(outputPath)
 
-    def _generateCustomAnnotation(self, pageDimensions: Dimensions, annotationText: str) -> MarkupAnnotation:
+    def _generateCustomAnnotation(self, pageDimensions: Dimensions, pdfOptions: PdfOptions) -> MarkupAnnotation:
 
         rect: RectangleObject = RectangleObject((0, 0, 0, 0))
-        rect.left   = FloatObject(self._preferences.annotationLeft)
-        rect.right  = FloatObject(self._preferences.annotationRight)
+        rect.left   = FloatObject(pdfOptions.annotationLeft)
+        rect.right  = FloatObject(pdfOptions.annotationLeft + pdfOptions.annotationWidth)
         rect.top    = FloatObject(pageDimensions.height - self._preferences.annotationTopOffset)
         rect.bottom = FloatObject(pageDimensions.height - self._preferences.annotationBottomOffset)
 
         annotation:   FreeText = FreeText(
-            text=f'{annotationText}',
+            text=f'{pdfOptions.annotationText}',
             rect=rect,
             font="PT Mono",
             bold=True,
@@ -235,3 +229,24 @@ class PyImage2Pdf:
         fullPath: Path = self._preferences.outputPath / f'{bareName}.{OUTPUT_SUFFIX}'
 
         return fullPath
+
+    def _retrievePreferences(self) -> PdfOptions:
+
+        actualOptions: PdfOptions = PdfOptions()
+
+        metadata: PdfMetaData = PdfMetaData(author=self._preferences.author,
+                                            producer=self._preferences.producer,
+                                            title=self._preferences.title,
+                                            subject=self._preferences.subject,
+                                            keywords=self._preferences.keywords)
+        actualOptions.pdfMetaData = metadata
+        from time import strftime
+
+        creationDate: str = strftime(self._preferences.dateFormat)
+        annotationText: str = f'{self._preferences.title} - {creationDate}'
+
+        actualOptions.annotationText = annotationText
+        actualOptions.annotationLeft = self._preferences.annotationLeft
+        actualOptions.annotationWidth = self._preferences.annotationWidth
+
+        return actualOptions
