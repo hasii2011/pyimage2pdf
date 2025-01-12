@@ -24,8 +24,8 @@ The basic command structure is:
       --version               Show the version and exit.
       -i, --input-file PATH   The input image file name to convert.  [required]
       -o, --output-file PATH  The output pdf file name.
+      -t, --title TEXT        The title to put on pdf file
       --help                  Show this message and exit.
-
 ```
 
 

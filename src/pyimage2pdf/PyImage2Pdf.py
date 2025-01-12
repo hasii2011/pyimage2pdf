@@ -26,7 +26,6 @@ from pypdf import PdfWriter
 from pypdf.annotations import FreeText
 from pypdf.annotations import MarkupAnnotation
 from pypdf.constants import AnnotationFlag
-from pypdf.constants import DocumentInformationAttributes
 from pypdf.generic import FloatObject
 from pypdf.generic import RectangleObject
 
@@ -64,10 +63,12 @@ def pdfMetaDataFactory() -> PdfMetaData:
 
 @dataclass
 class PdfOptions:
-    annotationText:  str         = ''
-    annotationLeft:  float       = 0.0
-    annotationWidth: float       = 0.0
-    pdfMetaData:     PdfMetaData = field(default_factory=pdfMetaDataFactory)
+    annotationText:         str   = ''
+    annotationLeft:         float = 0.0
+    annotationWidth:        float = 0.0
+    annotationTopOffset:    float = 0.0
+    annotationHeight:       float = 0.0
+    pdfMetaData: PdfMetaData      = field(default_factory=pdfMetaDataFactory)
 
 
 class PyImage2Pdf:
@@ -89,10 +90,13 @@ class PyImage2Pdf:
         if pdfOptions is None:
             actualOptions = self._retrievePreferences()
         else:
-            actualOptions.pdfMetaData        = pdfOptions.pdfMetaData
-            actualOptions.annotationText  = pdfOptions.annotationText
-            actualOptions.annotationLeft  = pdfOptions.annotationLeft
-            actualOptions.annotationWidth = actualOptions.annotationWidth
+            actualOptions.pdfMetaData = pdfOptions.pdfMetaData
+
+            actualOptions.annotationText       = pdfOptions.annotationText
+            actualOptions.annotationLeft       = pdfOptions.annotationLeft
+            actualOptions.annotationWidth      = pdfOptions.annotationWidth
+            actualOptions.annotationTopOffset  = pdfOptions.annotationTopOffset
+            actualOptions.annotationHeight     = pdfOptions.annotationHeight
 
         tmpPdfFileNamePath: Path       = self._createInitialPdf(imagePath, metadata=actualOptions.pdfMetaData)
         pdfReader:          PdfReader  = PdfReader(tmpPdfFileNamePath)
@@ -194,8 +198,8 @@ class PyImage2Pdf:
         rect: RectangleObject = RectangleObject((0, 0, 0, 0))
         rect.left   = FloatObject(pdfOptions.annotationLeft)
         rect.right  = FloatObject(pdfOptions.annotationLeft + pdfOptions.annotationWidth)
-        rect.top    = FloatObject(pageDimensions.height - self._preferences.annotationTopOffset)
-        rect.bottom = FloatObject(pageDimensions.height - self._preferences.annotationBottomOffset)
+        rect.top    = FloatObject(pageDimensions.height - pdfOptions.annotationTopOffset)
+        rect.bottom = FloatObject(rect.top - pdfOptions.annotationHeight)
 
         annotation:   FreeText = FreeText(
             text=f'{pdfOptions.annotationText}',
@@ -245,8 +249,10 @@ class PyImage2Pdf:
         creationDate: str = strftime(self._preferences.dateFormat)
         annotationText: str = f'{self._preferences.title} - {creationDate}'
 
-        actualOptions.annotationText = annotationText
-        actualOptions.annotationLeft = self._preferences.annotationLeft
-        actualOptions.annotationWidth = self._preferences.annotationWidth
+        actualOptions.annotationText         = annotationText
+        actualOptions.annotationLeft         = self._preferences.annotationLeft
+        actualOptions.annotationWidth        = self._preferences.annotationWidth
+        actualOptions.annotationTopOffset    = self._preferences.annotationTopOffset
+        actualOptions.annotationHeight       = self._preferences.annotationHeight
 
         return actualOptions
