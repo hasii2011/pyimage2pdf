@@ -49,7 +49,7 @@ class CommandClass:
 @version_option(version=f'{pyImage2PdfVersion}', message='%(version)s')
 @option('-i', '--input-file',  required=True,  type=clickPath(readable=True, exists=True,  path_type=Path), help='The input image file name to convert.')
 @option('-o', '--output-file', required=False, type=clickPath(writable=True,               path_type=Path), help='The output pdf file name.')
-@option('-t', '--title',       required=False,  help='The title to put on pdf file')
+@option('-t', '--title',       required=False,  help='The title to put on the pdf file')
 def commandHandler(input_file: Path, output_file: Path, title: str):
     """
     \b

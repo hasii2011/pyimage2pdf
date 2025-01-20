@@ -138,6 +138,7 @@ class PyImage2Pdf:
                             author=metadata.author,
                             producer=metadata.producer,
                             title=metadata.title,
+                            format='pdf',
                             subject=metadata.subject,
                             keywords=','.join(metadata.keywords)
                             )
