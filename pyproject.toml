@@ -29,7 +29,7 @@ dependencies = [
 test = [
     "html-testRunner~=1.2.1",
     "mypy== 1.14.0",
-    "buildlackey==1.7.0",
+    "buildlackey==1.8.0",
 ]
 
 deploy = [
@@ -47,6 +47,7 @@ Repository = 'https://github.com/hasii2011/pyimage2pdf'
 where = ['src']
 
 [tool.setuptools.package-data]
+'pyimage2pdf' = ['py.typed']
 'pyimage2pdf.resources' = ['loggingConfiguration.json']
 
 [tool.setuptools.dynamic]
