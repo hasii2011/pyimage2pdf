@@ -19,10 +19,21 @@ from PIL.ImageFile import ImageFile
 from PIL.Image import Image
 from PIL.Image import open as pilOpen
 
+#
+# I am manually importing this plugin;  When this code gets packaged by
+# py2app the plugin is NOT loaded and causes a failure
+#
+#  File "PIL/Image.pyc", line 2591, in save
+#  KeyError: 'PDF'
+#
+# noinspection PyUnresolvedReferences
+from PIL import PdfImagePlugin
+
 from pypdf import DocumentInformation
 from pypdf import PageObject
 from pypdf import PdfReader
 from pypdf import PdfWriter
+
 from pypdf.annotations import FreeText
 from pypdf.annotations import MarkupAnnotation
 from pypdf.constants import AnnotationFlag
